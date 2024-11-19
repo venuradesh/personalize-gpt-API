@@ -10,6 +10,7 @@ class APIKeys:
 
 @dataclass
 class UserDetails:
+    _id: Optional[str] = None
     first_name: str = ""
     last_name: str = ""
     date_of_birth: str = ""
@@ -24,5 +25,9 @@ class UserDetails:
     created: Optional[str] = None
     last_update: Optional[str] = None
 
-    def to_dict(self):
-        return asdict(self)
+    def to_dict(self, include_doc_id: bool = False):
+        data = asdict(self)
+        if not include_doc_id:
+            data.pop('_id', None)
+
+        return data

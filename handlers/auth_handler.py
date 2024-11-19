@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask import Blueprint, jsonify, make_response, request
+from flask_jwt_extended import jwt_required, set_access_cookies, set_refresh_cookies
 from Helpers.Common import get_user_details
 from custom_types.UserDetails import UserDetails
 from models.UserModel import User
@@ -19,7 +19,12 @@ def login():
     
     response, status_code = AuthService().authenticate_user(email, password)
 
-    return jsonify({"message": response['message'], "data":response['data'], 'error': response['error'] }), status_code
+    if status_code is 200:
+        res = make_response(jsonify(response), status_code)
+        set_access_cookies(res, encoded_access_token=response["data"]["access_token"])
+        set_refresh_cookies(res, encoded_refresh_token=response["data"]["refresh_token"])
+
+    return jsonify({"message": response["message"], "data": response["data"]["user_data"], "error": response['error']}), status_code
 
 
 

@@ -16,7 +16,7 @@ def hash_password(password):
 
 
 
-def validate_password(stored_password, provided_password):
+def validate_password(stored_password, provided_password) -> bool:
     """Validate a password"""
     try:
         iterations, salt, key = stored_password.split(".")
@@ -30,6 +30,7 @@ def validate_password(stored_password, provided_password):
             dklen=KEY_SIZE,
         )
         return new_key == key
+    
     except ValueError as e:
         # Handle potential ValueError when splitting or decoding
         print(f"Error in validate_password: {e}")
