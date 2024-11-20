@@ -26,12 +26,12 @@ class AuthService:
 
             #set access Tokens
             access_token, refresh_token = self.set_access_tokens(user_data._id)
-
-            return {"message": 'Authentication successful', "data": {"user_data": user_data, "access_token": access_token, "refresh_token": refresh_token}, "error": False}, 200
+            return {"message": 'Authentication successful', "data": user_data.to_user_profile_dict(), "access_token": access_token, "refresh_token": refresh_token, "error": False}, 200
 
         except Exception as e:
             return {"message": str(e), "data": {}, "error": True}, 401
         
+
 
     def get_user_by_email(self, email) -> UserDetails:
         try:
@@ -55,7 +55,8 @@ class AuthService:
             raise e
 
         except Exception as e:
-            raise RuntimeError(f"Error fetcing user with email: {email}")
+             raise RuntimeError(f"Error fetcing user with email: {email}")
+
 
 
     def set_access_tokens(self, user_id: str) -> tuple[str, str]:

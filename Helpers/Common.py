@@ -24,3 +24,4 @@ def get_user_details(data_as_json) -> UserDetails:
 def is_email_exists(db: Client, collection:str , email: str):
     user_data = db.collection(collection).where('email', '==', email).limit(1)
     return any(user_data.stream())
+

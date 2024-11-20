@@ -18,13 +18,16 @@ def login():
         return jsonify({"message": "Email and password are required.", "data": None, "error": True}), 400
     
     response, status_code = AuthService().authenticate_user(email, password)
+    sending_response = {"message": response['message'], "data": response['data'], "error": response['error']}
 
     if status_code is 200:
-        res = make_response(jsonify(response), status_code)
-        set_access_cookies(res, encoded_access_token=response["data"]["access_token"])
-        set_refresh_cookies(res, encoded_refresh_token=response["data"]["refresh_token"])
-
-    return jsonify({"message": response["message"], "data": response["data"]["user_data"], "error": response['error']}), status_code
+        res = make_response(jsonify(sending_response), status_code)
+        set_access_cookies(res, encoded_access_token=response["access_token"])
+        set_refresh_cookies(res, encoded_refresh_token=response["refresh_token"])
+        return res
+    
+    else:
+        return jsonify(sending_response), status_code 
 
 
 

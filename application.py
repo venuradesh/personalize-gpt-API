@@ -1,9 +1,10 @@
 import os
 import secrets
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import timedelta
 import firebase_admin
 from flask import Flask
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from firebase_admin import credentials
 
@@ -19,13 +20,17 @@ def create_app():
     else:
         app.config.from_object('config.DevelopmentConfig')
 
+    #Handle Cors
+    CORS(app=app, supports_credentials=True)
+
     app.secret_key = secrets.token_hex(32)
     # JWT Configuration
+    app.secret_key = secrets.token_hex(32)
     app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(64)
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(weeks=1)
     app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
-    app.config['JWT_COOKIE_CSRF_PROTECT'] = True
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
     app.config['SESSION_COOKIE_AGE'] = timedelta(weeks=1)
 
     # Firebase configurations
@@ -35,8 +40,6 @@ def create_app():
             raise FileNotFoundError(f"Firebase credentials not found at {cred_path}")
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred)
-
-    print('within the cred path', cred_path)
 
     JWTManager(app=app)
 
