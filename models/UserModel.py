@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, Dict, Tuple
 from custom_types.UserDetails import UserDetails
 from firebase_admin import firestore
 from Helpers.Common import is_email_exists
@@ -11,7 +12,7 @@ class User:
         self.USER_COLLECTION = "pgpt-users"
 
 
-    def save(self):
+    def save(self) -> Tuple[Dict[str, Any], int]:
         try:
             is_email_available = is_email_exists(self.db, self.USER_COLLECTION, self.user_details.email)
             if is_email_available:
@@ -26,4 +27,4 @@ class User:
             return {"message": "Successfully created", "data": None, "error": False}, 201
 
         except ValueError as e:
-            return {"message": str(e), "data": None, "error": True}, 403
+            raise e

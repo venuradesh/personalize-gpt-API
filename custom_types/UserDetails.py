@@ -19,11 +19,12 @@ class UserDetails:
     job_title: str = ""
     hashed_password: str = ""
     personality: str = ""
+    country: str = ""
     description: Optional[str] = None
-    choosen_llm: Optional[str] = None
+    choosen_llm: str = ""
     api_keys: APIKeys = field(default_factory=lambda: APIKeys("", ""))
-    created: Optional[str] = None
-    last_update: Optional[str] = None
+    created: str = ""
+    last_update: str = ""
     access_token: Optional[str] = None
     refresh_token: Optional[str] = None
 

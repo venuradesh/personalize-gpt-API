@@ -1,4 +1,5 @@
 from os import access
+from typing import Any, Dict, Tuple
 from firebase_admin import firestore
 from flask import jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token
@@ -12,7 +13,7 @@ class AuthService:
         self.USERS_COLLECTION = 'pgpt-users'
 
 
-    def authenticate_user(self, email, password):
+    def authenticate_user(self, email, password) -> Tuple[Dict[str, Any], int] :
         try:
             user_data: UserDetails = self.get_user_by_email(email)
             is_valid_password: bool = validate_password(user_data.hashed_password, password)
@@ -26,7 +27,7 @@ class AuthService:
 
             #set access Tokens
             access_token, refresh_token = self.set_access_tokens(user_data._id)
-            return {"message": 'Authentication successful', "data": user_data.to_user_profile_dict(), "access_token": access_token, "refresh_token": refresh_token, "error": False}, 200
+            return {"message": 'Authentication successful', "data": {"user_id": user_data._id}, "access_token": access_token, "refresh_token": refresh_token, "error": False}, 200
 
         except Exception as e:
             return {"message": str(e), "data": {}, "error": True}, 401

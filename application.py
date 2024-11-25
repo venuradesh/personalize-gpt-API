@@ -10,6 +10,7 @@ from firebase_admin import credentials
 
 # Blueprints
 from handlers.auth_handler import auth_blueprint
+from handlers.user_handler import user_blueprint
 
 def create_app():
     app = Flask(__name__)
@@ -45,6 +46,7 @@ def create_app():
 
     # Regsiter blueprints
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    app.register_blueprint(user_blueprint, url_prefix='/user')
 
     return app
 
