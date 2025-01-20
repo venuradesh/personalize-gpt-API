@@ -1,4 +1,5 @@
 from typing import Dict
+from uuid import uuid4
 
 from flask import session
 from Helpers.langchain import LangchainHelper
@@ -54,3 +55,10 @@ class ChatService:
 
         except Exception as e:
             raise Exception("No session chat available")
+        
+
+    def get_new_chat(self) -> None:
+        session.clear()
+        session['chat_id'] = str(uuid4())
+
+        return None

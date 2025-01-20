@@ -23,17 +23,19 @@ class ChatHistory:
 
             chat_ref = self.chat_collection.document(user_id).collection(self.CHAT_HISTORY_INNER_COLLECTION).document(chat_id)
             message_data = self._prepare_chat_data(user_msg, assistant_msg)
-
+            doc_snapshot = chat_ref.get()
+            is_new_document = not doc_snapshot.exists
 
             #save or update the chat document
-            chat_ref.set(
-                {
-                    "chat": firestore.firestore.ArrayUnion(message_data),
-                    "created_at": firestore.firestore.SERVER_TIMESTAMP if not chat_ref.get().exists else None,
-                    "updated_at": firestore.firestore.SERVER_TIMESTAMP
-                },
-                merge=True,
-            )
+            data = {
+                "chat": firestore.firestore.ArrayUnion(message_data),
+                "updated_at": firestore.firestore.SERVER_TIMESTAMP,  # Always update this
+            }
+
+            if is_new_document:
+                data["created_at"] = firestore.firestore.SERVER_TIMESTAMP 
+
+            chat_ref.set(data, merge=True)
 
             return chat_id
 

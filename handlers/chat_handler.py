@@ -32,3 +32,13 @@ def load_session_chat():
         return jsonify({'message': "Session data loaded", "data": session_data, "error": False}), 200
     except Exception as e:
         return jsonify({'message': str(e), "data": None, "error": True}), 400
+    
+
+@chat_blueprint.route('/start-new-chat', methods=['GET'])
+@jwt_required(refresh=True)
+def start_new_chat():
+    try:
+        ChatService().get_new_chat()
+        return jsonify({'message': 'New chat started', 'data': [], 'error': False}), 200
+    except Exception as e:
+        return jsonify({'message': str(e), "data": None, "error": True}), 400
