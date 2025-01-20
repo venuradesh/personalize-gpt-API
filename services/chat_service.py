@@ -1,9 +1,10 @@
-from typing import Dict, List
-from Helpers import Common
+from typing import Dict
+
+from flask import session
 from Helpers.langchain import LangchainHelper
 from Helpers.user_api_key import UserAPIKey
 from firebase_admin import firestore
-from Helpers.Common import get_user_profile
+from Helpers.Common import get_user_profile, format_date_to_gmt
 
 from models.ChatHistory import ChatHistory
 
@@ -40,7 +41,16 @@ class ChatService:
 
             chat_id = self.chat_history.save_messages(user_id, user_input, response)
 
-            return { "response": response, "chat_id": chat_id }
+            return { "response": response, "chat_id": chat_id, 'created': format_date_to_gmt() }
 
         except Exception as e:
             raise Exception(f"Error occured while genearting the Response: {str(e)}")
+        
+    def load_session_chat(self, user_id):
+        try:
+            if 'chat_id' not in session:
+                return []
+            return ChatHistory().get_chat_history(user_id)
+
+        except Exception as e:
+            raise Exception("No session chat available")

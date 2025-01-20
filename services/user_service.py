@@ -78,7 +78,7 @@ class UserService:
                 raise ValueError("Invalid API Choosen")
             
             llm_update_details['choosen_llm'] = changed_llm['choosen_llm']
-            llm_update_details['api_keys'][choosen_api_key] = changed_llm['api_key']
+            llm_update_details['api_keys'][choosen_api_key] = changed_llm['api_key'] if not llm_update_details['api_keys'][choosen_api_key] else llm_update_details["api_keys"][choosen_api_key]
 
             user_doc_ref.update(llm_update_details)
 

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, session
 from flask_jwt_extended import jwt_required, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
 from services.auth_service import AuthService
 
@@ -34,5 +34,6 @@ def login():
 def logout():
     response = jsonify({'message': 'Logout successful', 'data': None, 'error': False})
     unset_jwt_cookies(response)
+    session.clear()
 
     return response, 200

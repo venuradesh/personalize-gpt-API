@@ -3,6 +3,7 @@ from heapq import merge
 from typing import List
 from uuid import uuid4
 from firebase_admin import firestore
+from Helpers.Common import format_date_to_gmt
 from flask import session
 
 class ChatHistory:
@@ -22,6 +23,7 @@ class ChatHistory:
 
             chat_ref = self.chat_collection.document(user_id).collection(self.CHAT_HISTORY_INNER_COLLECTION).document(chat_id)
             message_data = self._prepare_chat_data(user_msg, assistant_msg)
+
 
             #save or update the chat document
             chat_ref.set(
@@ -60,17 +62,15 @@ class ChatHistory:
 
         
     def _prepare_chat_data(self, user_msg: str, assistant_msg: str) -> List:
-        current_time = datetime.now()
         return [
             {
                 "role": "user",
                 "content": user_msg,
-                "timestamp": current_time
+                "timestamp": format_date_to_gmt()
             },
             {
                 "role": "assistant",
                 "content": assistant_msg,
-                "timestamp": current_time
+                "timestamp": format_date_to_gmt()
             }
         ]
-        

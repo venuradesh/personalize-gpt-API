@@ -1,5 +1,7 @@
 
+from datetime import datetime, timezone
 import os
+import pytz
 from custom_types.UserDetails import APIKeys, UserDetails, UserProfile
 from utils.password_utils import hash_password
 from google.cloud.firestore import Client
@@ -82,3 +84,9 @@ def get_user_profile_from_user_details(user_details: UserDetails) -> UserProfile
         personality=user_details.personality,
         description=user_details.description or ""
     )
+
+
+def format_date_to_gmt() -> str:
+    utc_now = datetime.now(timezone.utc)
+    formatted_date = utc_now.strftime("%a %b %d %Y %H:%M:%S GMT%z")
+    return formatted_date

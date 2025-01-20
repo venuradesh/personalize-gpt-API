@@ -25,9 +25,9 @@ class PromptUtil:
         """
 
     @staticmethod
-    def generate_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[str], user_profile: UserProfile):
+    def generate_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[dict], user_profile: UserProfile):
         retrieved_text = "\n".join([f"- {doc.page_content}" for doc in retrieved_docs])
-        history_text = "\n".join(chat_history)
+        history_text = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in chat_history])
         user_context = PromptUtil.get_user_context(user_profile.to_dict())
 
         return f"""
