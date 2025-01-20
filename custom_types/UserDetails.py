@@ -42,3 +42,19 @@ class UserDetails:
     def to_user_profile_dict(self) -> dict:
         excluded_fields = {'access_token', 'refresh_token', 'hashed_password'}
         return {key: value for key, value in asdict(self).items() if key not in excluded_fields}
+
+
+@dataclass
+class UserProfile:
+    _id:Optional[str] = None
+    first_name: str = ""
+    last_name: str = ""
+    date_of_birth: str = ""
+    email: str = ""
+    job_title: str = ""
+    country: str = ""
+    personality: str = ""
+    description: str = ""
+
+    def to_dict(self) -> dict:
+        return asdict(self)
