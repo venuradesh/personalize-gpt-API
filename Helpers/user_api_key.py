@@ -1,4 +1,5 @@
 from firebase_admin import firestore
+from pydantic import SecretStr
 
 class UserAPIKey:
     def __init__(self) -> None:
@@ -40,3 +41,12 @@ class UserAPIKey:
             
         except Exception as e:
             raise e
+        
+    
+    def get_user_api_key(self, user_id: str, choosen_llm: str) -> str:
+        if choosen_llm.lower() == 'openai':
+            return self.get_user_openai_api_key(user_id)
+        elif choosen_llm.lower() == 'llama-3.1':
+            return self.get_user_llama_api_key(user_id)
+        else:
+            raise ValueError("Invalid LLM selected")

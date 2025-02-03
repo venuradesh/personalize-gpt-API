@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 from langchain.schema import Document
 
 from custom_types.UserDetails import UserProfile
@@ -25,7 +25,7 @@ class PromptUtil:
         """
 
     @staticmethod
-    def generate_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[dict], user_profile: UserProfile):
+    def generate_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[Any], user_profile: UserProfile):
         retrieved_text = "\n".join([f"- {doc.page_content}" for doc in retrieved_docs])
         history_text = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in chat_history])
         user_context = PromptUtil.get_user_context(user_profile.to_dict())

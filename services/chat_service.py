@@ -15,23 +15,16 @@ class ChatService:
         self.user_apikey = UserAPIKey()
         self.chat_history = ChatHistory()
         self.db = firestore.client()
-
-    def get_user_api_key(self, user_id: str, choosen_llm: str) -> str:
-        if choosen_llm.lower() == 'openai':
-            return self.user_apikey.get_user_openai_api_key(user_id)
-        elif choosen_llm.lower() == 'llama-3.1':
-            return self.user_apikey.get_user_llama_api_key(user_id)
-        else:
-            raise ValueError("Invalid LLM selected")
         
     def generate_response(self, user_id: str, user_input: str) -> Dict: 
         try:
             choosen_llm = self.user_apikey.get_user_choosen_api(user_id)
-            api_key = self.get_user_api_key(user_id, choosen_llm)
+            api_key = self.user_apikey.get_user_api_key(user_id, choosen_llm)
 
             # Initialize LLM
             llm = LangchainHelper.initialize_llm(choosen_llm, api_key)
-            retriever = LangchainHelper.create_retriever(user_id, top_k=3)
+            vector_db_path = f"./vector_index/{user_id}"
+            retriever = LangchainHelper.create_retriever(user_id, vector_db_path, top_k=3)
             retrieved_docs = retriever.get_relevant_documents(user_input)
             user_profile = get_user_profile(self.db, user_id)
             chat_history = self.chat_history.get_chat_history(user_id)

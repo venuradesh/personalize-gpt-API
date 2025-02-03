@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import Any, Dict, Tuple
 from firebase_admin import firestore
 from flask_jwt_extended import get_jwt_identity
-from Helpers.Common import convert_json_to_user_details
-from custom_types.UserDetails import UserDetails
+from Helpers.Common import convert_json_to_user_details, get_user_profile
+from custom_types.UserDetails import UserDetails, UserProfile
 from models.UserModel import User
 
 
@@ -52,6 +52,13 @@ class UserService:
 
             return {"message": "Updated Successfully", "data": None, "error": False}, 202
 
+        except Exception as e:
+            raise e
+        
+    def get_user_profile(self, user_id) -> UserProfile:
+        try:
+            return get_user_profile(self.db, user_id)
+        
         except Exception as e:
             raise e
         

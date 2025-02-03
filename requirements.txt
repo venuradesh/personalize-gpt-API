@@ -87,6 +87,7 @@ pydantic-settings==2.7.1
 pydantic_core==2.27.2
 PyJWT==2.10.0
 pyparsing==3.2.0
+PyPDF2==3.0.1
 python-dotenv==1.0.1
 pytz==2024.2
 PyYAML==6.0.2

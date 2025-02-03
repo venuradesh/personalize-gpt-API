@@ -13,7 +13,7 @@ from Helpers.user_api_key import UserAPIKey
 
 class VectorDBHelper:
     @staticmethod
-    def create_or_load_index(index_path: str, user_id: str):
+    def create_or_load_index(index_path: str, user_id: str) -> FAISS:
         user_api_key = UserAPIKey()
         choosen_llm = user_api_key.get_user_choosen_api(user_id)
         api_key = user_api_key.get_user_openai_api_key(user_id) if choosen_llm.lower() == 'openai' else os.getenv('DEFAULT_OPEN_AI_API_KEY', "")

@@ -30,8 +30,7 @@ class LangchainHelper:
             raise e
 
     @staticmethod
-    def create_retriever(user_id, top_k: int = 3) -> BaseRetriever:
-        vector_db_path = f"./vector_index/{user_id}"
+    def create_retriever(user_id, vector_db_path: str, top_k: int = 3) -> BaseRetriever:
         index = VectorDBHelper.create_or_load_index(vector_db_path, user_id)
         return index.as_retriever(search_kwargs={"k": top_k})
     
