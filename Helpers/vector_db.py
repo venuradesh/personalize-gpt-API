@@ -34,10 +34,11 @@ class VectorDBHelper:
             raise e
         
     @staticmethod
-    def add_documents_to_index(index: FAISS, documents: List[str]) -> FAISS:
+    def add_documents_to_index(index: FAISS, documents: List[str], save_path: str) -> FAISS:
         try:
             doc_objects = [Document(page_content=doc) for doc in documents]
             index.add_texts([doc.page_content for doc in doc_objects], metadatas=None)
+            index.save_local(save_path)
             return index
         
         except Exception as e:

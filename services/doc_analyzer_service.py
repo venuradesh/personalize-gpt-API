@@ -27,7 +27,7 @@ class DocAnalyzerService:
             text_chunks = split_text_into_chunks(extracted_text)
 
             index = VectorDBHelper.create_or_load_index(vector_db_path, user_id)
-            VectorDBHelper.add_documents_to_index(index, text_chunks)
+            VectorDBHelper.add_documents_to_index(index, text_chunks, vector_db_path)
 
             return {'message': 'Document processed and stored successfully', 'error': False, 'data': None}
 

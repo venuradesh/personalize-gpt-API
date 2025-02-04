@@ -65,13 +65,13 @@ class ChatHistory:
         return self._get_chat_history(user_id, self.CHAT_HISTORY_INNER_DOC_COLLECTION, doc_chat_id)
         
     
-    
+
     def _get_chat_history(self, user_id: str, colelction_name: str, chat_id: str) -> List:
         try:
             chat_ref = self.chat_collection.document(user_id).collection(colelction_name).document(chat_id)
             chat_doc = chat_ref.get()
 
-            if chat_doc.exists:
+            if not chat_doc.exists:
                 return []
             
             return chat_doc.to_dict().get('chat', [])

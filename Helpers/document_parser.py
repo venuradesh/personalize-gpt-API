@@ -28,7 +28,7 @@ def split_text_into_chunks(text: str, chunk_size: int = 700, overlap: int = 50) 
         raise Exception(f"Error splitting text into chunks: {str(e)}")
     
 
-def retrieve_document_chunks(user_id: str, vector_db_path: str, query: str, top_k: int = 5):
+def retrieve_document_chunks(user_id: str, vector_db_path: str, query: str, top_k: int = 10):
     try:
         index = VectorDBHelper.create_or_load_index(vector_db_path, user_id)
         return VectorDBHelper.search_index(index, query, top_k)
