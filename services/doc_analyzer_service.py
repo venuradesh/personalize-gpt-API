@@ -1,12 +1,14 @@
 from typing import Dict, List
 from langchain.schema import Document
-
+import openai
 from flask import session
-from Helpers.document_parser import extract_text_from_file, split_text_into_chunks, retrieve_document_chunks
+from Helpers import user_api_key
+from Helpers.document_parser import retrieve_document_chunks, upload_document
 from Helpers.langchain import LangchainHelper
 from Helpers.user_api_key import UserAPIKey
-from Helpers.vector_db import VectorDBHelper
 from models.ChatHistory import ChatHistory
+from services import assistant_service
+from services.assistant_service import AssistantService
 from services.user_service import UserService
 
 class DocAnalyzerService:
@@ -23,11 +25,7 @@ class DocAnalyzerService:
             session[self.DOC_ANALYZER_VECTOR_DB_PATH_KEY] = vector_db_path
             session['file_name'] = file_name
 
-            extracted_text = extract_text_from_file(file)
-            text_chunks = split_text_into_chunks(extracted_text)
-
-            index = VectorDBHelper.create_or_load_index(vector_db_path, user_id)
-            VectorDBHelper.add_documents_to_index(index, text_chunks, vector_db_path)
+            upload_document(file, vector_db_path, user_id)
 
             return {'message': 'Document processed and stored successfully', 'error': False, 'data': None}
 
@@ -37,8 +35,14 @@ class DocAnalyzerService:
     def generate_response(self, user_id: str, query: str) -> Dict:
         try:
             vector_db_path = session[self.DOC_ANALYZER_VECTOR_DB_PATH_KEY]
-            retrieved_docs = retrieve_document_chunks(user_id, vector_db_path, query)
-            response = self._generate_document_response(user_id, query, retrieved_docs)
+            choosen_llm = self.user_api_key.get_user_choosen_api(user_id)
+
+            if choosen_llm.lower() == 'openai':
+                response = self._generate_openai_assistant_response(user_id, query)
+
+            else:
+                retrieved_docs = retrieve_document_chunks(user_id, vector_db_path, query)
+                response = self._generate_document_response(user_id, query, retrieved_docs)
 
             return {'message': 'Query Processed', 'data': response, 'error': False}
 
@@ -63,5 +67,21 @@ class DocAnalyzerService:
 
         except Exception as e:
             raise Exception(f"Error generating response: {str(e)}")
+        
+
+    def _generate_openai_assistant_response(self, user_id: str, query: str) -> Dict:
+        try:
+            file_id = session['openai_file_id']
+            if not file_id:
+                raise ValueError("No document uploaded to openAI Assistant.")
+            
+            api_key = self.user_api_key.get_user_openai_api_key(user_id)
+            assistant_response = AssistantService.process_query(query, user_id, api_key)
+            
+            return assistant_response
+
+
+        except Exception as e:
+            raise Exception(f"Error in OpenAI Assistant response: {str(e)}")
 
         

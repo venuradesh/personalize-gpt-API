@@ -24,11 +24,12 @@ def upload_file():
     
 
 @doc_analyzer_blueprint.route('/user-query', methods=['POST'])
+@jwt_required(refresh=True)
 def user_query():
     try:
         data = request.get_json()
         query = data.get('query', '')
-        user_id = "FVP6CO0ZxmaoaJeSa6SN"
+        user_id = get_jwt_identity()
         analyzer_service = DocAnalyzerService()
         response = analyzer_service.generate_response(user_id, query)
 
