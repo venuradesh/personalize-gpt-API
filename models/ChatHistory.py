@@ -63,7 +63,7 @@ class ChatHistory:
         except Exception as e:
             raise e
         
-
+        
     def _get_latest_chat_id(self, user_id):
         try:
             user_chat_ref = self.chat_collection.document(user_id).collection(self.CHAT_HISTORY_INNER_COLLECTION)

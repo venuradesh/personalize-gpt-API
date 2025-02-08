@@ -44,10 +44,25 @@ class DocAnalyzerService:
                 retrieved_docs = retrieve_document_chunks(user_id, vector_db_path, query)
                 response = self._generate_document_response(user_id, query, retrieved_docs)
 
+            self.chat_history.save_doc_messages(user_id, query, response)
             return {'message': 'Query Processed', 'data': response, 'error': False}
 
         except Exception as e:
             raise e
+        
+
+    def load_doc_session_chats(self, user_id):
+        try:
+            file_name = session.get('file_name', '')
+            file_extension = session.get('file_extension', 'pdf')
+            if not file_name:
+                return {'file_name': '', 'chat': []}
+            else:
+                return {'file_name': f"{file_name}.{file_extension}", 'chat':self.chat_history.get_doc_chat_history(user_id)}
+
+        except Exception as e:
+            raise e
+
 
     def _generate_document_response(self, user_id: str, user_query: str, retrieved_docs: List[Document]) -> str:
         try:
@@ -58,10 +73,9 @@ class DocAnalyzerService:
             user_details = self.user_service.get_user_profile(user_id)
             chat_history = self.chat_history.get_doc_chat_history(user_id)
 
-            prompt = LangchainHelper.generate_prompt(user_query, retrieved_docs, chat_history, user_details)
+            prompt = LangchainHelper.generate_doc_prompt(user_query, retrieved_docs, chat_history, user_details)
             response = llm.predict(prompt)
 
-            self.chat_history.save_doc_messages(user_id, user_query, response)
 
             return response
 

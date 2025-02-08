@@ -38,3 +38,18 @@ def user_query():
     except Exception as e:
         return jsonify({'message': str(e), 'data': None, 'error': True}), 400
     
+
+
+@doc_analyzer_blueprint.route('/get-doc-chat-session', methods=['GET'])
+@jwt_required(refresh=True)
+def get_doc_chat_session():
+    try:
+        user_id = get_jwt_identity()
+        analyzer_service = DocAnalyzerService()
+        data = analyzer_service.load_doc_session_chats(user_id)
+
+        return jsonify({'message': 'Session data loaded', 'data': data, 'error': False}), 200
+
+    except Exception as e:
+        return jsonify({'message': str(e), 'data': None, 'error': True}), 400
+    

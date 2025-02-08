@@ -42,8 +42,6 @@ class AssistantService:
             if not file_id:
                 raise ValueError("No file has been uploaded")
             
-            file_extension = session.get('file_extension', 'pdf')
-
             thread_id = session['openai_thread_id']
             if not thread_id:
                 thread = openai.beta.threads.create()

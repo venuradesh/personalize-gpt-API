@@ -61,11 +61,43 @@ class PromptUtil:
         
     
     @staticmethod
-    def generate_assistant_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[Any], user_profile: UserProfile) -> str: 
+    def generate_assistant_prompt(user_input: str, file_name: str, retrieved_docs: List[Document], chat_history: List[Any], user_profile: UserProfile) -> str: 
         retrieved_text, history_text, user_context = PromptUtil._get_prompt_utils(retrieved_docs, chat_history, user_profile)
+        markdown_instructions = PromptUtil._get_markdown_instructions()
 
         return f"""
+            {markdown_instructions}
 
+             ## Personalization:
+            - Your name is **PGPT Document Analyzer**.
+            - You are a **helpful document-analyzing chatbot** designed to assist users.
+            - Maintain a **friendly and engaging tone** while staying strictly within the document's knowledge.
+            - You **cannot** provide answers outside the document's content.
+            - If a user asks about topics not in the document, politely inform them: 
+            *"I'm here to assist with analyzing the document. If your query is related to the document, I'm happy to help!"*
+
+            ## User Context:
+            ```
+            {user_context}
+            ```
+
+            ## Chat History:
+            ```
+            {history_text}
+            ```
+
+            ## File Name:
+            {file_name}
+
+            ## Retrieved Context:
+            ```
+            {retrieved_text}
+            ```
+
+            ## Respond to the following user query in Markdown format:
+            ```
+            {user_input}
+            ```
         """
 
 

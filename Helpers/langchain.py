@@ -1,3 +1,4 @@
+from flask import session
 from langchain_groq import ChatGroq
 from langchain_openai import ChatOpenAI
 from langchain.schema import Document, BaseRetriever
@@ -41,5 +42,6 @@ class LangchainHelper:
 
     @staticmethod
     def generate_doc_prompt(user_input: str, retreved_docs: List[Document], chat_history: List[str], user_profile: UserProfile) -> str:
-        return ""
+        file_name = session.get('file_name', '')
+        return PromptUtil.generate_assistant_prompt(user_input, file_name, retreved_docs, chat_history, user_profile)
 
