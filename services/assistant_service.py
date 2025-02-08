@@ -3,28 +3,12 @@ from typing import Dict, List
 from flask import session
 import openai
 from pydantic import SecretStr
-import requests
 
 
 class AssistantService:
     def __init__(self) -> None:
         pass
 
-    @staticmethod
-    def get_assistant_and_tool(file_extension: str):
-        assistants_and_tools = {
-            'pdf': ("asst_fZkHJmy8MTZew183ecI8H5yf", "file_search"),
-
-            # TODO: Enable the other file formats later
-            # "doc": ("asst_kdI13H9SJcyAuYP4CIYKAm70", "file_search"),
-            # "docx": ("asst_kdI13H9SJcyAuYP4CIYKAm70", "file_search"),
-            # "txt": ("asst_dtuMqbYp8NoTqmjcSIoR9HZb", "file_search"),
-            # "csv": ("asst_dAvw9gE2NcDA9q8wJYQkbpuH", "code_interpreter"),
-            # "xlsx": ("asst_0mBnRhStoBOz6XbHx4ots6bL", "code_interpreter")
-        }
-
-        return assistants_and_tools.get(file_extension, ("asst_fZkHJmy8MTZew183ecI8H5yf", "file_search"))
-    
     @staticmethod
     def upload_file_to_openai(file, api_key: str) -> str:
         try:
@@ -59,7 +43,6 @@ class AssistantService:
                 raise ValueError("No file has been uploaded")
             
             file_extension = session.get('file_extension', 'pdf')
-            assistant_id, tool_type = AssistantService.get_assistant_and_tool(file_extension)
 
             thread_id = session['openai_thread_id']
             if not thread_id:
@@ -69,29 +52,58 @@ class AssistantService:
 
             # TODO: Include chat history
 
+            formatted_chat_history = AssistantService.get_formatted_chat_history_for_openai_assistant(chat_history)
+
             openai.beta.threads.messages.create(
                 thread_id=thread_id,
                 role='user',
                 content=query,
                 attachments=[
-                    {'file_id': file_id}
+                    {'file_id': file_id, 'tools': [{'type': 'file_search'}]}
                 ]
             )
 
-            run = openai.beta.threads.runs.create(
+            assistant_id = AssistantService.create_openai_assistant(api_key)
+            run = openai.beta.threads.runs.create_and_poll(
                 thread_id=thread_id,
                 assistant_id=assistant_id,
+                instructions=f"Use this chat history to answer the given questions. {formatted_chat_history}. \n"
             )
 
             while run.status in ["queued", "in_progress"]:
                 run = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
 
             messages = openai.beta.threads.messages.list(thread_id=thread_id)
-            assistant_response = messages.data[0].content
+            assistant_response = ''.join(block.text.value for block in messages.data[0].content if block.type == 'text')
 
-            return {'message': 'Query processed', 'data': assistant_response, 'error': False}
+            return assistant_response
 
         except Exception as e:
             raise Exception(f"Error in OpenAI Assistant response: {str(e)}")
 
+    @staticmethod
+    def create_openai_assistant(api_key: str) -> str:
+        try:
+            openai.api_key = api_key
+            assistant_id = session.get('assistant_id', '')
 
+            if assistant_id:
+                return assistant_id
+            
+            assistant = openai.beta.assistants.create(
+                name='Document Analyzer',
+                instructions='You are a document analysis assistant. Answer questions based on uploaded documents.',
+                tools=[{'type': 'file_search'}],
+                model='gpt-4-turbo'
+            )
+
+            session['assistant_id'] = assistant.id
+            return assistant.id
+
+        except Exception as e:
+            raise e
+        
+
+    @staticmethod
+    def get_formatted_chat_history_for_openai_assistant(chat_history: List) -> str:
+        return "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in chat_history])

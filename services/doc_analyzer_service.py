@@ -69,7 +69,7 @@ class DocAnalyzerService:
             raise Exception(f"Error generating response: {str(e)}")
         
 
-    def _generate_openai_assistant_response(self, user_id: str, query: str) -> Dict:
+    def _generate_openai_assistant_response(self, user_id: str, query: str) -> str:
         try:
             file_id = session['openai_file_id']
             if not file_id:
@@ -79,7 +79,6 @@ class DocAnalyzerService:
             assistant_response = AssistantService.process_query(query, user_id, api_key)
             
             return assistant_response
-
 
         except Exception as e:
             raise Exception(f"Error in OpenAI Assistant response: {str(e)}")

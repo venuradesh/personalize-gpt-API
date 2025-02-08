@@ -37,4 +37,9 @@ class LangchainHelper:
     @staticmethod
     def generate_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[str], user_profile: UserProfile) -> str:
         return PromptUtil.generate_prompt(user_input, retrieved_docs, chat_history, user_profile)
+    
+
+    @staticmethod
+    def generate_doc_prompt(user_input: str, retreved_docs: List[Document], chat_history: List[str], user_profile: UserProfile) -> str:
+        return ""
 

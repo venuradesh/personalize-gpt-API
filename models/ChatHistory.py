@@ -5,6 +5,7 @@ from uuid import uuid4
 from firebase_admin import firestore
 from Helpers.Common import format_date_to_gmt
 from flask import session
+from google.cloud import firestore as Firestore_Google
 
 class ChatHistory:
     def __init__(self) -> None:
@@ -49,13 +50,33 @@ class ChatHistory:
     def get_chat_history(self, user_id: str) -> List:
         try:
             if "chat_id" not in session:
-                return []
+                latest_chat_id = self._get_latest_chat_id(user_id)
+                if latest_chat_id:
+                    session['chat_id'] = latest_chat_id
+                else:
+                    return []
             
             chat_id = session['chat_id']
-            return self._get_chat_history(user_id, self.CHAT_HISTORY_INNER_COLLECTION, chat_id)
+            session_data = self._get_chat_history(user_id, self.CHAT_HISTORY_INNER_COLLECTION, chat_id)
+            return session_data
 
         except Exception as e:
             raise e
+        
+
+    def _get_latest_chat_id(self, user_id):
+        try:
+            user_chat_ref = self.chat_collection.document(user_id).collection(self.CHAT_HISTORY_INNER_COLLECTION)
+            latest_chat = user_chat_ref.order_by("updated_at", direction=Firestore_Google.Query.DESCENDING).limit(1).get()
+
+            if latest_chat:
+                return latest_chat[0].id
+            
+            return None
+
+        except Exception as e:
+            raise e
+
         
     def get_doc_chat_history(self, user_id) -> List:
         if "doc_chat_id" not in session:
@@ -78,8 +99,8 @@ class ChatHistory:
 
         except Exception as e:
             raise e
-
-
+        
+    
     def _update_chat_document(self, chat_ref, user_msg: str, assistant_msg: str):
         doc_snapshot = chat_ref.get()
         message_data = self._prepare_chat_data(user_msg, assistant_msg)

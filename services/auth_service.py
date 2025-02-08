@@ -1,7 +1,7 @@
 from os import access
 from typing import Any, Dict, Tuple
 from firebase_admin import firestore
-from flask import jsonify
+from flask import jsonify, session
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 from custom_types.UserDetails import UserDetails
@@ -27,6 +27,7 @@ class AuthService:
 
             #set access Tokens
             access_token, refresh_token = self.set_access_tokens(user_data._id)
+            session.clear()
             return {"message": 'Authentication successful', "data": {"user_id": user_data._id}, "access_token": access_token, "refresh_token": refresh_token, "error": False}, 200
 
         except Exception as e:

@@ -26,25 +26,103 @@ class PromptUtil:
 
     @staticmethod
     def generate_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[Any], user_profile: UserProfile):
-        retrieved_text = "\n".join([f"- {doc.page_content}" for doc in retrieved_docs])
-        history_text = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in chat_history])
-        user_context = PromptUtil.get_user_context(user_profile.to_dict())
+        retrieved_text, history_text, user_context = PromptUtil._get_prompt_utils(retrieved_docs, chat_history, user_profile)
+        markdown_instructions = PromptUtil._get_markdown_instructions()
 
         return f"""
-            Your name is PersonalizeGPT.\
-            You are a helpful assistant personalized for the user to cater the answers that the user is expecting.\
-            Use the following details to tailor your responses:
+            {markdown_instructions}
 
+            ## Personalization:
+            - Your name is **PersonalizeGPT**.
+            - You are a **helpful, personalized assistant** tailored for the user.
+            - Maintain a **friendly and engaging tone**.
+            - Ensure responses align with the user's personality.
+
+            ## User Context:
+            ```
             {user_context}
+            ```
 
-            Chat History: 
+            ## Chat History:
+            ```
             {history_text}
+            ```
 
-            Based on the following retrieved context:
+            ## Retrieved Context:
+            ```
             {retrieved_text}
+            ```
 
-            Respond to the user query:
+            ## Respond to the following user query in Markdown format:
+            ```
             {user_input}
+            ```
+        """
+        
+    
+    @staticmethod
+    def generate_assistant_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[Any], user_profile: UserProfile) -> str: 
+        retrieved_text, history_text, user_context = PromptUtil._get_prompt_utils(retrieved_docs, chat_history, user_profile)
+
+        return f"""
+
+        """
+
+
+    @staticmethod
+    def _get_prompt_utils(retrieved_docs: List[Document], chat_history: List[Any], user_profile: UserProfile):
+        retrieved_text = PromptUtil._get_formatted_retrieved_text(retrieved_docs)
+        history_text = PromptUtil._get_formatted_chat_history(chat_history)
+        user_context = PromptUtil.get_user_context(user_profile.to_dict())
+
+        return retrieved_text, history_text, user_context
+            
+    
+    @staticmethod
+    def _get_formatted_chat_history(chat_history: List[Any]) -> str:
+        return "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in chat_history])
+    
+
+    @staticmethod
+    def _get_formatted_retrieved_text(retrieved_docs: List[Document]) -> str:
+        return "\n".join([f"- {doc.page_content}" for doc in retrieved_docs])
+    
+
+    @staticmethod
+    def _get_markdown_instructions() -> str:
+        return f"""
+            # Instructions:
+            - **Use Markdown syntax in all responses.**
+            - **Ensure every response follows Markdown formatting strictly.**
+            - **If a specific formatting type is needed (e.g., a list, table, or heading), ensure the response is structured accordingly.**
+            - **Do NOT output plain text responses.**
+
+            ## Markdown Formatting Guide:
+            - **Headings**: Use `# H3`, `## H4`, etc. Make sure no H1.
+            - Use **double newlines (`\n\n`)** before each heading (`#`, `##`, `###`, etc.) to create proper spacing.
+            - Ensure that links (`[text](URL)`) appear on a new line with a blank line before them.
+            - **Bold**: `**bold**`, **bold**
+            - **Italic**: `*italic*`, *italic*
+            - **Lists**: 
+            - U
+            - `- Unordered item`
+            - `1. Ordered item`
+            - **Code Blocks**:
+            ```python
+            print("Hello, World!")
+            ```
+            - When generating **code blocks**, follow these rules:
+                1. **Specify the language** at the top in bold (e.g., `**Language: TypeScript**`).
+                2. Use **triple backticks** with the language (` ```typescript `) for syntax highlighting.
+                3. Wrap the code inside a `<div>` with `overflow-x: auto;` to ensure horizontal scrolling.
+                4. Use **HTML `<pre>` and `<code>`** with inline CSS to apply syntax coloring for keywords.
+                
+            - **Tables**:
+            ```
+            | Column 1 | Column 2 |
+            |----------|----------|
+            | Data 1   | Data 2   |
+            ```
         """
     
 
