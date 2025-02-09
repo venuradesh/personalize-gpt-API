@@ -17,6 +17,7 @@ class AuthService:
         try:
             user_data: UserDetails = self.get_user_by_email(email)
             is_valid_password: bool = validate_password(user_data.hashed_password, password)
+            session.clear()  
             
             if not is_valid_password:
                 return {"message": "Password is incorrect", "data": None, "error": True}, 401
@@ -27,7 +28,6 @@ class AuthService:
 
             #set access Tokens
             access_token, refresh_token = self.set_access_tokens(user_data._id)
-            session.clear()
             return {"message": 'Authentication successful', "data": {"user_id": user_data._id}, "access_token": access_token, "refresh_token": refresh_token, "error": False}, 200
 
         except Exception as e:

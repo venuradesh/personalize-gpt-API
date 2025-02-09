@@ -22,7 +22,7 @@ class ChatService:
             api_key = self.user_apikey.get_user_api_key(user_id, choosen_llm)
 
             # Initialize LLM
-            llm = LangchainHelper.initialize_llm(choosen_llm, api_key)
+            # llm = LangchainHelper.initialize_llm(choosen_llm, api_key)
             agent = LangchainHelper.initialize_agent(api_key, choosen_llm)
             vector_db_path = f"./vector_index/{user_id}"
             retriever = LangchainHelper.create_retriever(user_id, vector_db_path, top_k=3)
@@ -44,6 +44,7 @@ class ChatService:
     def load_session_chat(self, user_id):
         try:
             if 'chat_id' not in session:
+                session['chat_id'] = str(uuid4())
                 return []
             return ChatHistory().get_chat_history(user_id)
 
