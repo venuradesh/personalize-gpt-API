@@ -150,11 +150,16 @@ class PromptUtil:
                 4. Use **HTML `<pre>` and `<code>`** with inline CSS to apply syntax coloring for keywords.
                 
             - **Tables**:
+            <div style="overflow-x: auto;" class="table-container">
             ```
             | Column 1 | Column 2 |
             |----------|----------|
             | Data 1   | Data 2   |
             ```
+            </div>
+
+            - When generating **Tables**, follow these rules:
+                1. Wrap the table inside a `<div>` with `overflow-x: auto;` to ensure horizontal scrolling.
         """
     
 
