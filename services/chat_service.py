@@ -23,6 +23,7 @@ class ChatService:
 
             # Initialize LLM
             llm = LangchainHelper.initialize_llm(choosen_llm, api_key)
+            agent = LangchainHelper.initialize_agent(api_key, choosen_llm)
             vector_db_path = f"./vector_index/{user_id}"
             retriever = LangchainHelper.create_retriever(user_id, vector_db_path, top_k=3)
             retrieved_docs = retriever.get_relevant_documents(user_input)
@@ -31,7 +32,7 @@ class ChatService:
 
             # generate prompt
             prompt = LangchainHelper.generate_prompt(user_input, retrieved_docs, chat_history, user_profile)
-            response = llm.predict(prompt)
+            response = agent.run(prompt)
 
             chat_id = self.chat_history.save_messages(user_id, user_input, response)
 
