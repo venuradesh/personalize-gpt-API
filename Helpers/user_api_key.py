@@ -1,5 +1,5 @@
 from firebase_admin import firestore
-from pydantic import SecretStr
+from Helpers.Common import decrypt_data
 
 class UserAPIKey:
     def __init__(self) -> None:
@@ -24,7 +24,8 @@ class UserAPIKey:
             user_doc = self.user_collection.document(user_id).get()
 
             if user_doc.exists:
-                return user_doc.get('api_keys').get('openai_api_key')
+                openai_encyrpted_key = user_doc.get('api_keys').get('openai_api_key')
+                return decrypt_data(openai_encyrpted_key)
             raise Exception("No OpenAI key found. Please provide a valid key to proceed")
             
         except Exception as e:
@@ -36,7 +37,8 @@ class UserAPIKey:
             user_doc = self.user_collection.document(user_id).get()
 
             if user_doc.exists:
-                return user_doc.get('api_keys').get('llama_api_key')
+                llama_encrypted_key = user_doc.get('api_keys').get('llama_api_key')
+                return decrypt_data(llama_encrypted_key)
             raise Exception("No GroqCloud API key found. Please provide a valid key to proceed")
             
         except Exception as e:
