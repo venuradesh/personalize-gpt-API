@@ -1,7 +1,7 @@
 from os import access
 from typing import Any, Dict, Tuple
 from firebase_admin import firestore
-from flask import jsonify
+from flask import jsonify, session
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 from custom_types.UserDetails import UserDetails
@@ -17,6 +17,7 @@ class AuthService:
         try:
             user_data: UserDetails = self.get_user_by_email(email)
             is_valid_password: bool = validate_password(user_data.hashed_password, password)
+            session.clear()  
             
             if not is_valid_password:
                 return {"message": "Password is incorrect", "data": None, "error": True}, 401

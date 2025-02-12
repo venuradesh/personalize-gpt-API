@@ -42,3 +42,29 @@ def start_new_chat():
         return jsonify({'message': 'New chat started', 'data': [], 'error': False}), 200
     except Exception as e:
         return jsonify({'message': str(e), "data": None, "error": True}), 400
+    
+
+@chat_blueprint.route('/get-chat-history', methods=['GET'])
+@jwt_required(refresh=True)
+def get_chat_history():
+    try:
+        user_id = get_jwt_identity()
+        response = ChatService().get_user_chat_history(user_id)
+        return jsonify({'message': 'Successfully fetched', 'data': response, 'error': False}), 200
+    
+    except Exception as e:
+        return jsonify({'message': str(e), "data": None, "error": True}), 400
+    
+
+@chat_blueprint.route('/load-chat-from-chat-id', methods=["POST"])
+@jwt_required(refresh=True)
+def load_chat_from_chat_id():
+    try:
+        data = request.get_json()
+        user_id = get_jwt_identity()
+        chat_id = data.get('chat_id', '')
+        response = ChatService().load_chat_from_chat_id(user_id, chat_id)
+        return jsonify({'message': 'Successfully loaded the chat', 'data': response, 'error': False}), 200
+
+    except Exception as e:
+        return jsonify({'message': str(e), "data": None, "error": True}), 400

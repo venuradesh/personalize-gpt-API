@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import Any, Dict, Tuple
 from firebase_admin import firestore
 from flask_jwt_extended import get_jwt_identity
-from Helpers.Common import convert_json_to_user_details
-from custom_types.UserDetails import UserDetails
+from Helpers.Common import convert_json_to_user_details, get_user_profile, encrypt_data, decrypt_data
+from custom_types.UserDetails import UserDetails, UserProfile
 from models.UserModel import User
 
 
@@ -55,6 +55,13 @@ class UserService:
         except Exception as e:
             raise e
         
+    def get_user_profile(self, user_id) -> UserProfile:
+        try:
+            return get_user_profile(self.db, user_id)
+        
+        except Exception as e:
+            raise e
+        
 
     def update_llm_modal_and_keys(self, changed_llm: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
         try:
@@ -78,7 +85,12 @@ class UserService:
                 raise ValueError("Invalid API Choosen")
             
             llm_update_details['choosen_llm'] = changed_llm['choosen_llm']
-            llm_update_details['api_keys'][choosen_api_key] = changed_llm['api_key'] if not llm_update_details['api_keys'][choosen_api_key] else llm_update_details["api_keys"][choosen_api_key]
+
+            if not llm_update_details["api_keys"][choosen_api_key] and not changed_llm['api_key']:
+                raise ValueError(f"You don't have any f{changed_llm['choosen_llm']} key specified.")
+            
+            if changed_llm["api_key"]:
+               llm_update_details["api_keys"][choosen_api_key] = encrypt_data(changed_llm["api_key"]) 
 
             user_doc_ref.update(llm_update_details)
 

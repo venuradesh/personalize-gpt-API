@@ -1,7 +1,6 @@
 
 from datetime import datetime, timezone
 import os
-import pytz
 from custom_types.UserDetails import APIKeys, UserDetails, UserProfile
 from utils.password_utils import hash_password
 from google.cloud.firestore import Client
@@ -49,6 +48,9 @@ def encrypt_data(value: str) -> (str):
         return ""
     try:
         key = os.environ.get('FERNET_KEY', '')
+        if not key:
+            raise ValueError("FERNET_KEY is not set")
+        
         fernet = Fernet(key.encode())
         encrypted_data = fernet.encrypt(value.encode())
         return encrypted_data.decode()
@@ -59,13 +61,16 @@ def encrypt_data(value: str) -> (str):
 
 
 def decrypt_data(encrypted_value: str) -> str:
-    if not encrypt_data:
+    if not encrypted_value:
         return ""
     
     try:
         key = os.environ.get('FERNET_KEY', '')
+        if not key:
+            raise ValueError("FERNET_KEY is not set")
+        
         fernet = Fernet(key.encode())
-        decrupted_data = fernet.encrypt(encrypted_value.encode())
+        decrupted_data = fernet.decrypt(encrypted_value.encode())
         return decrupted_data.decode()
     
     except Exception as e:
