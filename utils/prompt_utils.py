@@ -159,5 +159,21 @@ class PromptUtil:
                 1. Wrap the table inside a `<div>` with `overflow-x: auto;` to ensure horizontal scrolling.
         """
     
+    @staticmethod
+    def get_chat_summary(query: str, assistant_msg: str) -> str:
+        return f"""
+            #Instructions:
+            - **Provide a concise 3-4 word summary of the following user query.
+            - **Maintain the accuracy and relavance
+            - **Limit the word count to Maximum 4 words.
+            - **Use simple words for the summary
+
+             ## Respond with the summary using this conversation:
+            ```
+                user_input: {query}
+                assistant_response: {assistant_msg}
+            ```
+        """
+    
 
     

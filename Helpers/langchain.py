@@ -59,11 +59,14 @@ class LangchainHelper:
         except Exception as e:
             raise e
 
-
     @staticmethod
-    def create_retriever(user_id, vector_db_path: str, top_k: int = 3) -> BaseRetriever:
+    def create_retriever(user_id: str, vector_db_path: str, top_k: int = 3) -> BaseRetriever:
         index = VectorDBHelper.create_or_load_index(vector_db_path, user_id)
         return index.as_retriever(search_kwargs={"k": top_k})
+    
+    @staticmethod
+    def get_chat_summary(query:str, assistant_msg: str):
+        return PromptUtil.get_chat_summary(query, assistant_msg)
     
     @staticmethod
     def generate_prompt(user_input: str, retrieved_docs: List[Document], chat_history: List[str], user_profile: UserProfile) -> str:

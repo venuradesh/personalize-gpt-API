@@ -2,6 +2,7 @@ from typing import Dict
 from uuid import uuid4
 
 from flask import session
+from sympy import laguerre
 from Helpers.langchain import LangchainHelper
 from Helpers.user_api_key import UserAPIKey
 from firebase_admin import firestore
@@ -22,7 +23,7 @@ class ChatService:
             api_key = self.user_apikey.get_user_api_key(user_id, choosen_llm)
 
             # Initialize LLM
-            # llm = LangchainHelper.initialize_llm(choosen_llm, api_key)
+            llm = LangchainHelper.initialize_llm(choosen_llm, api_key)
             agent = LangchainHelper.initialize_agent(api_key, choosen_llm)
             vector_db_path = f"./vector_index/{user_id}"
             retriever = LangchainHelper.create_retriever(user_id, vector_db_path, top_k=3)
@@ -34,7 +35,7 @@ class ChatService:
             prompt = LangchainHelper.generate_prompt(user_input, retrieved_docs, chat_history, user_profile)
             response = agent.run(prompt)
 
-            chat_id = self.chat_history.save_messages(user_id, user_input, response)
+            chat_id = self.chat_history.save_messages(user_id, user_input, response, llm)
 
             return { "response": response, "chat_id": chat_id, 'created': format_date_to_gmt() }
 
@@ -57,3 +58,21 @@ class ChatService:
         session['chat_id'] = str(uuid4())
 
         return None
+    
+
+    def get_user_chat_history(self, user_id):
+        return self.chat_history.get_user_chat_history(user_id)
+    
+
+    def load_chat_from_chat_id(self, user_id, chat_id):
+        try:
+            is_chat_id_available = self.chat_history.is_chat_id_exists(user_id, chat_id)
+            if is_chat_id_available:
+                session['chat_id'] = chat_id
+                return self.chat_history.get_chat_from_chat_id(user_id, chat_id) 
+            
+            else:
+                raise ValueError("Chat ID does not Exists")
+
+        except Exception as e:
+            raise e
