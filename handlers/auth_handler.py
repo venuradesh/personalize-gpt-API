@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, make_response, request, session
 from flask_jwt_extended import jwt_required, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
 from services.auth_service import AuthService
+from services.sendgrid_service import MailService
+from services.user_service import UserService
 
 
 auth_blueprint = Blueprint('auth', __name__)
@@ -37,3 +39,33 @@ def logout():
     session.clear()
 
     return response, 200
+
+
+@auth_blueprint.route('/forgot-password', methods=["POST"])
+def forgot_password():
+    try:
+        data = request.get_json()
+        email = data.get('email', '')
+
+        mail_service = MailService()
+        mail_service.send_reset_email(email)
+        return jsonify({'message': 'Succefully sent the reset instructions', 'data': None, 'error': False}), 200
+    
+    except Exception as e:
+        return jsonify({'message': str(e), "data": None, "error": True}), 400
+    
+
+
+@auth_blueprint.route('/authenticate-email-by-reset-token', methods=["POST"])
+def authenticate_email_by_reset_token():
+    try:
+        data = request.get_json()
+        token = data.get('reset_token', '')
+
+        user_service = UserService()
+        user_email, user_id = user_service.get_user_email_by_refresh_token(token)
+
+        return jsonify({'message': 'Reset token authenticated', 'data': {"email": user_email, "user_id": user_id}, 'error': False}), 200
+    
+    except Exception as e:
+        return jsonify({'message': str(e), "data": None, "error": True}), 400

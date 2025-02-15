@@ -53,3 +53,18 @@ def update_llm_modal():
         return UserService().update_llm_modal_and_keys(data)
     except Exception as e:
         return jsonify({"message": str(e), "data": None,"error": False}), 400
+    
+
+@user_blueprint.route('/password-reset', methods=['PUT'])
+def reset_password():
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id', '')
+        password = data.get('password', '')
+        user_service = UserService()
+        user_service.reset_passwords(user_id, password)
+
+        return jsonify({'message': 'Succefully updated the password', 'data': None, 'error': False}), 200
+    
+    except Exception as e:
+        return jsonify({'message': str(e), "data": None, "error": True}), 400

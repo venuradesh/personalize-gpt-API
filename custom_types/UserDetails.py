@@ -25,6 +25,7 @@ class UserDetails:
     api_keys: APIKeys = field(default_factory=lambda: APIKeys("", ""))
     created: str = ""
     last_update: str = ""
+    reset_token: Optional[str] = None
     access_token: Optional[str] = None
     refresh_token: Optional[str] = None
 
@@ -35,12 +36,13 @@ class UserDetails:
 
         if not include_tokens:
             data.pop('access_token', None)
+            data.pop('reset_token', None)
             data.pop('refresh_token', None)
 
         return data
     
     def to_user_profile_dict(self) -> dict:
-        excluded_fields = {'access_token', 'refresh_token', 'hashed_password'}
+        excluded_fields = {'access_token', 'refresh_token', 'hashed_password', 'reset_token'}
         return {key: value for key, value in asdict(self).items() if key not in excluded_fields}
 
 
