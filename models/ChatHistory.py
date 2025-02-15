@@ -36,14 +36,14 @@ class ChatHistory:
             raise e
         
     
-    def save_doc_messages(self, user_id: str, user_msg: str, assistant_msg: str, llm) -> str:
+    def save_doc_messages(self, user_id: str, user_msg: str, assistant_msg: str) -> str:
         try:
             if "doc_chat_id" not in session:
                 session['doc_chat_id'] = str(uuid4())
             
             doc_chat_id = session['doc_chat_id']
             chat_ref = self.chat_collection.document(user_id).collection(self.CHAT_HISTORY_INNER_DOC_COLLECTION).document(doc_chat_id)
-            self._update_chat_document(chat_ref, user_msg, assistant_msg, llm)
+            self._update_chat_document(chat_ref, user_msg, assistant_msg)
 
             return doc_chat_id
 
@@ -105,9 +105,10 @@ class ChatHistory:
             raise e
         
     
-    def _update_chat_document(self, chat_ref, user_msg: str, assistant_msg: str, llm):
+    def _update_chat_document(self, chat_ref, user_msg: str, assistant_msg: str, llm = None):
         doc_snapshot = chat_ref.get()
-        chat_summary = llm.predict(LangchainHelper.get_chat_summary(user_msg, assistant_msg))
+        chat_summary = llm.predict(LangchainHelper.get_chat_summary(user_msg, assistant_msg)) if llm else ""
+
         message_data = self._prepare_chat_data(user_msg, assistant_msg)
         is_new_document = not doc_snapshot.exists
 
